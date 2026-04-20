@@ -50,6 +50,8 @@ import {
   scrollToNode,
 } from '../../utils/utils';
 import { DataRow, ItemIdToExpandedRowMap, QueryMessage, QueryResult } from '../Main/main';
+import { CapabilitiesContext } from '../../framework/capabilities_context';
+import { DeploymentCapabilities } from '../../../common/utils/deployment_capabilities';
 
 interface QueryResultsBodyProps {
   language: string;
@@ -108,9 +110,11 @@ interface FieldValue {
 }
 
 class QueryResultsBody extends React.Component<QueryResultsBodyProps, QueryResultsBodyState> {
+  static contextType = CapabilitiesContext;
+  declare context: DeploymentCapabilities;
+
   public items: DataRow[];
   public columns: string[];
-  public panels: Array<{ id: number; items: Array<{ name: string; onClick: () => void }> }>;
   public expandedRowColSpan: number;
 
   constructor(props: QueryResultsBodyProps) {
@@ -136,32 +140,22 @@ class QueryResultsBody extends React.Component<QueryResultsBodyProps, QueryResul
     this.expandedRowColSpan = 0;
     this.items = [];
     this.columns = [];
+  }
 
-    this.panels = [
-      {
-        id: 0,
-        items: [
-          {
-            name: 'Download JDBC',
-            onClick: () => {
-              this.onDownloadJDBC();
-            },
-          },
-          {
-            name: 'Download CSV',
-            onClick: () => {
-              this.onDownloadCSV();
-            },
-          },
-          {
-            name: 'Download Text',
-            onClick: () => {
-              this.onDownloadText();
-            },
-          },
-        ],
-      },
-    ];
+  buildDownloadPanels() {
+    const items: Array<{ name: string; onClick: () => void }> = [];
+    if (this.context.hasDslJsonFormat) {
+      items.push({
+        name: 'Download JSON',
+        onClick: () => this.onDownloadJSON(),
+      });
+    }
+    items.push(
+      { name: 'Download JDBC', onClick: () => this.onDownloadJDBC() },
+      { name: 'Download CSV', onClick: () => this.onDownloadCSV() },
+      { name: 'Download Text', onClick: () => this.onDownloadText() }
+    );
+    return [{ id: 0, items }];
   }
 
   setIsModalVisible(visible: boolean): void {
@@ -195,6 +189,26 @@ class QueryResultsBody extends React.Component<QueryResultsBodyProps, QueryResul
   };
 
   // Actions for Download files
+  onDownloadJSON = (): void => {
+    if (this.props.language === 'PPL') {
+      this.setState({
+        downloadErrorModal: this.getModal(
+          'PPL result in JSON format is not supported, please select JDBC format.'
+        ),
+      });
+      this.setIsModalVisible(true);
+      return;
+    }
+    if (!this.props.queryResultsJSON) {
+      this.props.getJson(this.props.queries);
+    }
+    setTimeout(() => {
+      const jsonObject = JSON.parse(this.props.queryResultsJSON);
+      const data = JSON.stringify(jsonObject, undefined, 4);
+      onDownloadFile(data, 'json', this.props.selectedTabName + '.json');
+    }, 2000);
+  };
+
   onDownloadJDBC = (): void => {
     if (!this.props.queryResultsJDBC) {
       this.props.getJdbc(this.props.queries);
@@ -918,7 +932,7 @@ class QueryResultsBody extends React.Component<QueryResultsBodyProps, QueryResul
                         panelPaddingSize="none"
                         anchorPosition="downLeft"
                       >
-                        <EuiContextMenu initialPanelId={0} panels={this.panels} />
+                        <EuiContextMenu initialPanelId={0} panels={this.buildDownloadPanels()} />
                       </EuiPopover>
                     </div>
                   </EuiFlexItem>

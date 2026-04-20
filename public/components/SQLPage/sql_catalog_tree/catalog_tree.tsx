@@ -5,6 +5,7 @@
 
 import { EuiComboBoxOptionOption, EuiEmptyPrompt, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { useCapabilities } from '../../../framework/capabilities_context';
 import { OSTree } from './os_tree';
 import { S3Tree } from './s3_tree';
 
@@ -29,6 +30,13 @@ export const CatalogTree = ({
   language,
   updatePPLQueries,
 }: CatalogTreeProps) => {
+  const caps = useCapabilities();
+  const inS3Tab =
+    selectedItems !== undefined &&
+    selectedItems[0].label !== 'OpenSearch' &&
+    clusterTab === 'Data source Connections';
+  const catalogCacheAvailable = caps.hasCatalogCache;
+
   return (
     <>
       {selectedItems !== undefined &&
@@ -41,7 +49,7 @@ export const CatalogTree = ({
           dataSourceEnabled={dataSourceEnabled}
           dataSourceMDSId={dataSourceMDSId}
         />
-      ) : selectedItems[0].label !== 'OpenSearch' && clusterTab === 'Data source Connections' ? (
+      ) : inS3Tab && catalogCacheAvailable ? (
         <S3Tree
           dataSource={selectedItems[0].label}
           updateSQLQueries={updateSQLQueries}
@@ -51,6 +59,15 @@ export const CatalogTree = ({
           language={language}
           updatePPLQueries={updatePPLQueries}
         />
+      ) : inS3Tab ? (
+        <EuiFlexItem grow={false}>
+          <EuiEmptyPrompt
+            icon={<EuiIcon type="database" size="m" />}
+            iconColor="subdued"
+            titleSize="xs"
+            body={<p>Catalog browsing is not supported on this OpenSearch version.</p>}
+          />
+        </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt

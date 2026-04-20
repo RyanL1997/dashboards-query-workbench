@@ -32,20 +32,19 @@ export const [
   'renderCreateAccelerationFlyout'
 );
 
-export const registerObservabilityDependencies = (start?: ObservabilityStart) => {
-  if (!start) {
-    setRenderAccelerationDetailsFlyout(() => {});
-    setRenderAssociatedObjectsDetailsFlyout(() => {});
-    setRenderCreateAccelerationFlyout(() => {});
-    return;
-  }
+const noop = () => {};
 
-  setRenderAccelerationDetailsFlyout(start.renderAccelerationDetailsFlyout);
-  setRenderAssociatedObjectsDetailsFlyout(start.renderAssociatedObjectsDetailsFlyout);
-  setRenderCreateAccelerationFlyout(start.renderCreateAccelerationFlyout);
-  catalogCacheRefs.CatalogCacheManager = start.CatalogCacheManagerInstance;
-  catalogCacheRefs.useLoadDatabasesToCache = start.useLoadDatabasesToCacheHook;
-  catalogCacheRefs.useLoadTablesToCache = start.useLoadTablesToCacheHook;
-  catalogCacheRefs.useLoadTableColumnsToCache = start.useLoadTableColumnsToCacheHook;
-  catalogCacheRefs.useLoadAccelerationsToCache = start.useLoadAccelerationsToCacheHook;
+export const registerObservabilityDependencies = (start?: ObservabilityStart) => {
+  // Per-field fallbacks: older observability versions (obs < 2.13, shipped with
+  // AOS 1.3.2 / 2.11 / 2.12) don't export these fields. The workbench still
+  // loads on those hosts; features that need the missing APIs are gated off by
+  // `caps.hasCatalogCache` / `caps.hasAccelerationFlyout` in each consumer.
+  setRenderAccelerationDetailsFlyout(start?.renderAccelerationDetailsFlyout ?? noop);
+  setRenderAssociatedObjectsDetailsFlyout(start?.renderAssociatedObjectsDetailsFlyout ?? noop);
+  setRenderCreateAccelerationFlyout(start?.renderCreateAccelerationFlyout ?? noop);
+  catalogCacheRefs.CatalogCacheManager = start?.CatalogCacheManagerInstance;
+  catalogCacheRefs.useLoadDatabasesToCache = start?.useLoadDatabasesToCacheHook;
+  catalogCacheRefs.useLoadTablesToCache = start?.useLoadTablesToCacheHook;
+  catalogCacheRefs.useLoadTableColumnsToCache = start?.useLoadTableColumnsToCacheHook;
+  catalogCacheRefs.useLoadAccelerationsToCache = start?.useLoadAccelerationsToCacheHook;
 };

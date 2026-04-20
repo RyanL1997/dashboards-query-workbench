@@ -161,6 +161,14 @@ export class QueryService {
     return this.describeQueryPostInternal(request, 'sql.pplCsv', null, request.body, context);
   };
 
+  describeSQLJson = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
+    return this.describeQueryPostInternal(request, 'sql.sqlJson', 'json', request.body, context);
+  };
+
+  describePPLJson = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
+    return this.describeQueryPostInternal(request, 'sql.pplJson', 'json', request.body, context);
+  };
+
   describeSQLText = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
     return this.describeQueryPostInternal(request, 'sql.sqlText', null, request.body, context);
   };
