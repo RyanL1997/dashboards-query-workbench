@@ -9,6 +9,7 @@ import {
   Logger,
   OpenSearchServiceSetup,
 } from '../../../../src/core/server';
+import { ClusterInfoService } from '../services/ClusterInfoService';
 import QueryService from '../services/QueryService';
 import TranslateService from '../services/TranslateService';
 import { registerQueryRoute } from './query';
@@ -19,11 +20,12 @@ export function defineRoutes(
   client: ILegacyClusterClient | undefined,
   openSearchServiceSetup: OpenSearchServiceSetup,
   dataSourceEnabled: boolean,
-  logger: Logger
+  logger: Logger,
+  clusterInfoService: ClusterInfoService
 ) {
   const translateService = new TranslateService(client, dataSourceEnabled, logger);
   registerTranslateRoute(router, translateService, openSearchServiceSetup);
 
   const queryService = new QueryService(client, dataSourceEnabled, logger);
-  registerQueryRoute(router, queryService);
+  registerQueryRoute(router, queryService, clusterInfoService);
 }

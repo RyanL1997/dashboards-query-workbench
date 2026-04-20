@@ -10,8 +10,9 @@ import {
   CREATE_DATABASE_QUERY,
   CREATE_MATERIALIZED_VIEW,
   CREATE_TABLE_QUERY,
-  SKIPPING_INDEX_QUERY
+  SKIPPING_INDEX_QUERY,
 } from '../../../common/constants';
+import { useCapabilities } from '../../framework/capabilities_context';
 
 interface CreateButtonProps {
   updateSQLQueries: (query: string) => void;
@@ -19,8 +20,13 @@ interface CreateButtonProps {
 }
 
 export const CreateButton = ({ updateSQLQueries, selectedDatasource }: CreateButtonProps) => {
+  const caps = useCapabilities();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+
+  if (!caps.hasAccelerationFlyout) {
+    return null;
+  }
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -99,7 +105,7 @@ export const CreateButton = ({ updateSQLQueries, selectedDatasource }: CreateBut
                   {
                     name: 'Materialized View',
                     panel: 3,
-                  }
+                  },
                 ],
               },
               {
