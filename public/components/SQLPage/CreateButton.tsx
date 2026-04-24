@@ -19,14 +19,20 @@ interface CreateButtonProps {
   selectedDatasource: EuiComboBoxOptionOption[];
 }
 
-export const CreateButton = ({ updateSQLQueries, selectedDatasource }: CreateButtonProps) => {
+// Outer gate — a single cheap hook + early return, so the inner component's
+// stateful hooks don't run when the feature is unavailable for the current
+// backend. Keeps the Rules-of-Hooks story trivial to read.
+export const CreateButton = (props: CreateButtonProps) => {
   const caps = useCapabilities();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
-
   if (!caps.hasAccelerationFlyout) {
     return null;
   }
+  return <CreateButtonContent {...props} />;
+};
+
+const CreateButtonContent = ({ updateSQLQueries, selectedDatasource }: CreateButtonProps) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const closePopover = () => {
     setIsPopoverOpen(false);

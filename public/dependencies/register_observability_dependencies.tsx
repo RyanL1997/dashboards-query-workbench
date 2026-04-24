@@ -34,11 +34,37 @@ export const [
 
 const noop = () => {};
 
+// Fields we expect the observability plugin to provide. Missing ones are
+// legitimate on AOS < 2.13 (obs 2.13 is where these APIs landed), but we log
+// once so operators can tell "feature disabled because obs is old" apart from
+// "feature broken for another reason."
+const REQUIRED_OBS_FIELDS: Array<keyof ObservabilityStart> = [
+  'renderAccelerationDetailsFlyout',
+  'renderAssociatedObjectsDetailsFlyout',
+  'renderCreateAccelerationFlyout',
+  'CatalogCacheManagerInstance',
+  'useLoadDatabasesToCacheHook',
+  'useLoadTablesToCacheHook',
+  'useLoadTableColumnsToCacheHook',
+  'useLoadAccelerationsToCacheHook',
+];
+
 export const registerObservabilityDependencies = (start?: ObservabilityStart) => {
-  // Per-field fallbacks: older observability versions (obs < 2.13, shipped with
-  // AOS 1.3.2 / 2.11 / 2.12) don't export these fields. The workbench still
-  // loads on those hosts; features that need the missing APIs are gated off by
-  // `caps.hasCatalogCache` / `caps.hasAccelerationFlyout` in each consumer.
+  if (!start) {
+    console.warn(
+      'queryWorkbench: dashboards-observability plugin is not available; catalog tree and acceleration flyouts will be disabled.'
+    );
+  } else {
+    const missing = REQUIRED_OBS_FIELDS.filter((k) => start[k] === undefined);
+    if (missing.length > 0) {
+      console.warn(
+        `queryWorkbench: dashboards-observability plugin is present but missing fields [${missing.join(
+          ', '
+        )}]. Expected on AOS < 2.13; catalog tree and/or acceleration flyouts will be hidden.`
+      );
+    }
+  }
+
   setRenderAccelerationDetailsFlyout(start?.renderAccelerationDetailsFlyout ?? noop);
   setRenderAssociatedObjectsDetailsFlyout(start?.renderAssociatedObjectsDetailsFlyout ?? noop);
   setRenderCreateAccelerationFlyout(start?.renderCreateAccelerationFlyout ?? noop);
