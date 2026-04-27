@@ -5,11 +5,9 @@
 
 import React, { createContext, ReactNode, useContext } from 'react';
 import {
+  DEFAULT_CAPABILITIES,
   DeploymentCapabilities,
-  getDeploymentCapabilities,
 } from '../../common/utils/deployment_capabilities';
-
-const DEFAULT_CAPABILITIES = getDeploymentCapabilities(undefined);
 
 export const CapabilitiesContext = createContext<DeploymentCapabilities>(DEFAULT_CAPABILITIES);
 

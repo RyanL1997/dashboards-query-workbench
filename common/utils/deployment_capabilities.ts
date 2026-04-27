@@ -22,7 +22,13 @@ export interface DeploymentCapabilities {
   hasDslJsonFormat: boolean;
 }
 
-const S_FULL: DeploymentCapabilities = {
+/**
+ * Capabilities used when the connected cluster's version is unknown — first
+ * render before the resolver completes, probe failure, etc. Equivalent to
+ * `S-full` *except* `hasDslJsonFormat` is `false` so an unknown cluster is
+ * assumed to be 3.x-like (the legacy DSL JSON format was removed in 3.0).
+ */
+export const DEFAULT_CAPABILITIES: DeploymentCapabilities = {
   version: '',
   state: 'S-full',
   hasDataSources: true,
@@ -31,14 +37,13 @@ const S_FULL: DeploymentCapabilities = {
   hasFlintDDL: true,
   hasCatalogCache: true,
   hasAccelerationFlyout: true,
-  // Unknown/latest → assume 3.x behavior = no DSL JSON format.
   hasDslJsonFormat: false,
 };
 
 export function getDeploymentCapabilities(version: string | undefined): DeploymentCapabilities {
   const coerced = version ? semver.coerce(version) : null;
   if (!coerced) {
-    return S_FULL;
+    return DEFAULT_CAPABILITIES;
   }
 
   const v = coerced.version;
