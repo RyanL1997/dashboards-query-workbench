@@ -10,7 +10,7 @@ import {
   CREATE_DATABASE_QUERY,
   CREATE_MATERIALIZED_VIEW,
   CREATE_TABLE_QUERY,
-  SKIPPING_INDEX_QUERY,
+  SKIPPING_INDEX_QUERY
 } from '../../../common/constants';
 import { useCapabilities } from '../../framework/capabilities_context';
 
@@ -111,7 +111,7 @@ const CreateButtonContent = ({ updateSQLQueries, selectedDatasource }: CreateBut
                   {
                     name: 'Materialized View',
                     panel: 3,
-                  },
+                  }
                 ],
               },
               {

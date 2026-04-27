@@ -41,8 +41,8 @@ import { OPENSEARCH_SQL_INIT_QUERY } from '../../../common/constants';
 import { AsyncApiResponse, AsyncQueryStatus } from '../../../common/types';
 import { executeAsyncQuery } from '../../../common/utils/async_query_helpers';
 import {
+  DEFAULT_CAPABILITIES,
   DeploymentCapabilities,
-  getDeploymentCapabilities,
 } from '../../../common/utils/deployment_capabilities';
 import { fetchDataSources } from '../../../common/utils/fetch_datasources';
 import { resolveDeploymentCapabilities } from '../../../common/utils/resolve_capabilities';
@@ -304,7 +304,7 @@ export class Main extends React.Component<MainProps, MainState> {
       mdsClusterName: '',
       flintDataConnections: false,
       newNavEnabled: coreRefs?.chrome?.navGroup.getNavGroupEnabled(),
-      caps: getDeploymentCapabilities(undefined),
+      caps: DEFAULT_CAPABILITIES,
     };
     this.httpClient = this.props.httpClient;
     this.updateSQLQueries = _.debounce(this.updateSQLQueries, 250).bind(this);
@@ -344,7 +344,7 @@ export class Main extends React.Component<MainProps, MainState> {
     return caps;
   };
 
-  fetchFlintDataSources = (caps: DeploymentCapabilities = this.state.caps) => {
+  fetchFlintDataSources = (caps: DeploymentCapabilities) => {
     if (!caps.hasDataSources) {
       this.setState({ flintDataConnections: false });
       return;
@@ -1079,186 +1079,184 @@ export class Main extends React.Component<MainProps, MainState> {
 
     return (
       <CapabilitiesProvider value={this.state.caps}>
-        <>
-          {this.props.dataSourceEnabled && (
-            <this.DataSourceMenu
-              setMenuMountPoint={this.props.setActionMenu}
-              componentType={'DataSourceSelectable'}
-              componentConfig={{
-                savedObjects: this.props.savedObjects.client,
-                notifications: this.props.notifications,
-                fullWidth: true,
-                onSelectedDataSources: this.onSelectedDataSource,
-                dataSourceFilter: this.dataSourceFilterFn,
+        {this.props.dataSourceEnabled && (
+          <this.DataSourceMenu
+            setMenuMountPoint={this.props.setActionMenu}
+            componentType={'DataSourceSelectable'}
+            componentConfig={{
+              savedObjects: this.props.savedObjects.client,
+              notifications: this.props.notifications,
+              fullWidth: true,
+              onSelectedDataSources: this.onSelectedDataSource,
+              dataSourceFilter: this.dataSourceFilterFn,
+            }}
+          />
+        )}
+        <EuiPage paddingSize="none">
+          <EuiPanel grow={true} style={{ marginRight: '10px' }}>
+            <EuiPageSideBar
+              style={{
+                maxWidth: '400px',
+                width: '400px',
+                height: 'calc(100vh - 254px)',
               }}
-            />
-          )}
-          <EuiPage paddingSize="none">
-            <EuiPanel grow={true} style={{ marginRight: '10px' }}>
-              <EuiPageSideBar
-                style={{
-                  maxWidth: '400px',
-                  width: '400px',
-                  height: 'calc(100vh - 254px)',
-                }}
-              >
-                <EuiTitle size="xs">
-                  <p>
-                    <b>{this.state.mdsClusterName}</b>
-                  </p>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {this.state.flintDataConnections && (
-                  <EuiFlexGroup direction="row" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <ClusterTabs
-                        onChange={this.onChangeCluster}
-                        cluster={this.state.cluster}
-                        asyncLoading={this.state.asyncLoading}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        display="base"
-                        iconType="refresh"
-                        size="s"
-                        aria-label="refresh"
-                        onClick={this.handleReloadTree}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                )}
-                <EuiSpacer size="l" />
-                <EuiFlexGroup
-                  direction="column"
-                  style={{
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    height: 'calc(100vh - 308px)',
-                  }}
-                >
-                  {this.state.cluster === 'Data source Connections' && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiSpacer size="s" />
-                        <DataSelect
-                          http={this.httpClient}
-                          onSelect={this.handleDataSelect}
-                          urlDataSource={this.props.urlDataSource}
-                          asyncLoading={this.state.asyncLoading}
-                          dataSourceMDSId={this.state.selectedMDSDataConnectionId}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {this.state.language === 'SQL' && (
-                          <CreateButton
-                            updateSQLQueries={this.updateSQLQueries}
-                            selectedDatasource={this.state.selectedDatasource}
-                          />
-                        )}
-                      </EuiFlexItem>
-                    </>
-                  )}
+            >
+              <EuiTitle size="xs">
+                <p>
+                  <b>{this.state.mdsClusterName}</b>
+                </p>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              {this.state.flintDataConnections && (
+                <EuiFlexGroup direction="row" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <CatalogTree
-                      selectedItems={this.state.selectedDatasource}
-                      updateSQLQueries={this.updateSQLQueries}
-                      refreshTree={this.state.refreshTree}
-                      dataSourceEnabled={this.props.dataSourceEnabled}
-                      dataSourceMDSId={this.state.selectedMDSDataConnectionId}
-                      clusterTab={this.state.cluster}
-                      language={this.state.language}
-                      updatePPLQueries={this.updatePPLQueries}
+                    <ClusterTabs
+                      onChange={this.onChangeCluster}
+                      cluster={this.state.cluster}
+                      asyncLoading={this.state.asyncLoading}
                     />
-                    <EuiSpacer />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      display="base"
+                      iconType="refresh"
+                      size="s"
+                      aria-label="refresh"
+                      onClick={this.handleReloadTree}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiPageSideBar>
-            </EuiPanel>
-
-            <EuiPageContent paddingSize="m">
-              <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+              )}
+              <EuiSpacer size="l" />
+              <EuiFlexGroup
+                direction="column"
+                style={{
+                  overflowY: 'auto',
+                  overflowX: 'hidden',
+                  height: 'calc(100vh - 308px)',
+                }}
+              >
+                {this.state.cluster === 'Data source Connections' && (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiSpacer size="s" />
+                      <DataSelect
+                        http={this.httpClient}
+                        onSelect={this.handleDataSelect}
+                        urlDataSource={this.props.urlDataSource}
+                        asyncLoading={this.state.asyncLoading}
+                        dataSourceMDSId={this.state.selectedMDSDataConnectionId}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {this.state.language === 'SQL' && (
+                        <CreateButton
+                          updateSQLQueries={this.updateSQLQueries}
+                          selectedDatasource={this.state.selectedDatasource}
+                        />
+                      )}
+                    </EuiFlexItem>
+                  </>
+                )}
                 <EuiFlexItem grow={false}>
-                  <Switch
-                    onChange={this.onChange}
+                  <CatalogTree
+                    selectedItems={this.state.selectedDatasource}
+                    updateSQLQueries={this.updateSQLQueries}
+                    refreshTree={this.state.refreshTree}
+                    dataSourceEnabled={this.props.dataSourceEnabled}
+                    dataSourceMDSId={this.state.selectedMDSDataConnectionId}
+                    clusterTab={this.state.cluster}
                     language={this.state.language}
-                    asyncLoading={this.state.asyncLoading}
+                    updatePPLQueries={this.updatePPLQueries}
                   />
                   <EuiSpacer />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSmallButton href={link} target="_blank" iconType="popout" iconSide="right">
-                    {linkTitle}
-                  </EuiSmallButton>
-                </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiPageContentBody>
-                <EuiFlexGroup alignItems="center" />
-                <div>{page}</div>
-                <EuiSpacer size="l" />
-                {this.state.isCallOutVisible && (
-                  <>
-                    <EuiCallOut
-                      size="s"
-                      title="Query Submitted Successfully"
-                      color="success"
-                      iconType="check"
-                      dismissible
-                      onDismiss={() =>
-                        this.setState({
-                          isCallOutVisible: false,
-                        })
-                      }
-                    />
-                    <EuiSpacer size="l" />
-                  </>
-                )}
-                <div className="sql-console-query-result">
-                  <QueryResults
-                    language={this.state.language}
-                    queries={this.state.queries}
-                    queryResults={this.state.queryResultsTable}
-                    queryResultsJDBC={getSelectedResults(
-                      this.state.queryResults,
-                      this.state.selectedTabId
-                    )}
-                    queryResultsJSON={getSelectedResults(
-                      this.state.queryResultsJSON,
-                      this.state.selectedTabId
-                    )}
-                    queryResultsCSV={getSelectedResults(
-                      this.state.queryResultsCSV,
-                      this.state.selectedTabId
-                    )}
-                    queryResultsTEXT={getSelectedResults(
-                      this.state.queryResultsTEXT,
-                      this.state.selectedTabId
-                    )}
-                    messages={this.state.messages}
-                    selectedTabId={this.state.selectedTabId}
-                    selectedTabName={this.state.selectedTabName}
-                    onSelectedTabIdChange={this.onSelectedTabIdChange}
-                    itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-                    onQueryChange={this.onQueryChange}
-                    updateExpandedMap={this.updateExpandedMap}
-                    searchQuery={this.state.searchQuery}
-                    tabsOverflow={false}
-                    getJson={this.getJson}
-                    getJdbc={this.getJdbc}
-                    getCsv={this.getCsv}
-                    getText={this.getText}
-                    isResultFullScreen={this.state.isResultFullScreen}
-                    setIsResultFullScreen={this.setIsResultFullScreen}
-                    asyncLoadingStatus={this.state.asyncLoadingStatus}
-                    asyncQueryError={this.state.asyncQueryError}
-                    cancelAsyncQuery={this.state.cancelQueryHandler}
-                    selectedDatasource={this.state.selectedDatasource}
+            </EuiPageSideBar>
+          </EuiPanel>
+
+          <EuiPageContent paddingSize="m">
+            <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <Switch
+                  onChange={this.onChange}
+                  language={this.state.language}
+                  asyncLoading={this.state.asyncLoading}
+                />
+                <EuiSpacer />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton href={link} target="_blank" iconType="popout" iconSide="right">
+                  {linkTitle}
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiPageContentBody>
+              <EuiFlexGroup alignItems="center" />
+              <div>{page}</div>
+              <EuiSpacer size="l" />
+              {this.state.isCallOutVisible && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    title="Query Submitted Successfully"
+                    color="success"
+                    iconType="check"
+                    dismissible
+                    onDismiss={() =>
+                      this.setState({
+                        isCallOutVisible: false,
+                      })
+                    }
                   />
-                </div>
-              </EuiPageContentBody>
-            </EuiPageContent>
-          </EuiPage>
-        </>
+                  <EuiSpacer size="l" />
+                </>
+              )}
+              <div className="sql-console-query-result">
+                <QueryResults
+                  language={this.state.language}
+                  queries={this.state.queries}
+                  queryResults={this.state.queryResultsTable}
+                  queryResultsJDBC={getSelectedResults(
+                    this.state.queryResults,
+                    this.state.selectedTabId
+                  )}
+                  queryResultsJSON={getSelectedResults(
+                    this.state.queryResultsJSON,
+                    this.state.selectedTabId
+                  )}
+                  queryResultsCSV={getSelectedResults(
+                    this.state.queryResultsCSV,
+                    this.state.selectedTabId
+                  )}
+                  queryResultsTEXT={getSelectedResults(
+                    this.state.queryResultsTEXT,
+                    this.state.selectedTabId
+                  )}
+                  messages={this.state.messages}
+                  selectedTabId={this.state.selectedTabId}
+                  selectedTabName={this.state.selectedTabName}
+                  onSelectedTabIdChange={this.onSelectedTabIdChange}
+                  itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+                  onQueryChange={this.onQueryChange}
+                  updateExpandedMap={this.updateExpandedMap}
+                  searchQuery={this.state.searchQuery}
+                  tabsOverflow={false}
+                  getJson={this.getJson}
+                  getJdbc={this.getJdbc}
+                  getCsv={this.getCsv}
+                  getText={this.getText}
+                  isResultFullScreen={this.state.isResultFullScreen}
+                  setIsResultFullScreen={this.setIsResultFullScreen}
+                  asyncLoadingStatus={this.state.asyncLoadingStatus}
+                  asyncQueryError={this.state.asyncQueryError}
+                  cancelAsyncQuery={this.state.cancelQueryHandler}
+                  selectedDatasource={this.state.selectedDatasource}
+                />
+              </div>
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPage>
       </CapabilitiesProvider>
     );
   }
