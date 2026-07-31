@@ -78,11 +78,11 @@ export class QueryService {
       if (this.dataSourceEnabled && dataSourceMDSId) {
         client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
         queryResponse = await client.callAPI(format, {
-          jobId,
+          jobId: jobId,
         });
       } else {
         queryResponse = await this.client.asScoped(request).callAsCurrentUser(format, {
-          jobId,
+          jobId: jobId,
         });
       }
       return {
@@ -159,6 +159,14 @@ export class QueryService {
 
   describePPLCsv = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
     return this.describeQueryPostInternal(request, 'sql.pplCsv', null, request.body, context);
+  };
+
+  describeSQLJson = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
+    return this.describeQueryPostInternal(request, 'sql.sqlJson', 'json', request.body, context);
+  };
+
+  describePPLJson = async (context: Record<string, unknown>, request: Record<string, unknown>) => {
+    return this.describeQueryPostInternal(request, 'sql.pplJson', 'json', request.body, context);
   };
 
   describeSQLText = async (context: Record<string, unknown>, request: Record<string, unknown>) => {

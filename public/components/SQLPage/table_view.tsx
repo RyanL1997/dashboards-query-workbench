@@ -41,6 +41,7 @@ import {
 } from '../../../common/types';
 import { executeAsyncQuery } from '../../../common/utils/async_query_helpers';
 import { useToast } from '../../../common/utils/toast_helper';
+import { useCapabilities } from '../../framework/capabilities_context';
 import { AccelerationIndexFlyout } from './acceleration_index_flyout';
 import './table_view.scss';
 
@@ -52,6 +53,7 @@ interface CustomView {
 }
 
 export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }: CustomView) => {
+  const caps = useCapabilities();
   const [tableNames, setTableNames] = useState<string[]>([]);
   const [_selectedDatabase, setSelectedDatabase] = useState<string>('');
   const [_selectedTable, setSelectedTable] = useState<string | null>(null);
@@ -174,6 +176,8 @@ export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }
               });
             }
           },
+          caps,
+          undefined,
           () => {
             setIsLoading({
               flag: false,
@@ -255,6 +259,8 @@ export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }
             });
           }
         },
+        caps,
+        undefined,
         () => setTreeDataDatabaseError(databaseName)
       )
     );
@@ -333,6 +339,8 @@ export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }
             });
           }
         },
+        caps,
+        undefined,
         () => setTreeDataTableError(databaseName, tableName)
       )
     );
@@ -415,6 +423,8 @@ export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }
             });
           }
         },
+        caps,
+        undefined,
         () => setTreeDataTableError(tableName, databaseName)
       )
     );
@@ -468,6 +478,8 @@ export const TableView = ({ http, selectedItems, updateSQLQueries, refreshTree }
             });
           }
         },
+        caps,
+        undefined,
         () => setTreeDataTableError(databaseName, tableName)
       )
     );

@@ -9,6 +9,7 @@ import {
   PPL_QUERY_ROUTE,
   PPL_TRANSLATE_ROUTE,
   FORMAT_CSV,
+  FORMAT_JSON,
   FORMAT_TEXT,
   SPARK_SQL_QUERY_ROUTE,
   DATASOURCES_GET_QUERY,
@@ -51,6 +52,22 @@ export default function sqlPlugin(Client, config, components) {
     needBody: true,
     method: 'POST',
   }); //default: jdbc
+
+  sql.sqlJson = ca({
+    url: {
+      fmt: `${SQL_QUERY_ROUTE}?${FORMAT_JSON}`,
+    },
+    needBody: true,
+    method: 'POST',
+  });
+
+  sql.pplJson = ca({
+    url: {
+      fmt: `${PPL_QUERY_ROUTE}?${FORMAT_JSON}`,
+    },
+    needBody: true,
+    method: 'POST',
+  });
 
   sql.sqlCsv = ca({
     url: {
